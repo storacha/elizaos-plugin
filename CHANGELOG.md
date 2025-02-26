@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6](https://github.com/storacha/elizaos-plugin/compare/v1.0.5...v1.0.6) (2025-02-26)
+
+
+### Bug Fixes
+
+* npmignore ([5144265](https://github.com/storacha/elizaos-plugin/commit/51442653fad1d2b9dd57c2c0340502a945f4632a))
+
 ## [1.0.5](https://github.com/storacha/elizaos-plugin/compare/v1.0.4...v1.0.5) (2025-02-26)
 
 
