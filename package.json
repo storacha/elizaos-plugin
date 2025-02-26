@@ -6,6 +6,10 @@
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/storacha/elizaos-plugin"
+  },
   "exports": {
     "./package.json": "./package.json",
     ".": {
