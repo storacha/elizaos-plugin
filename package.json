@@ -1,6 +1,6 @@
 {
   "name": "@storacha/elizaos-plugin",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Storacha Storage Plugin for ElizaOS",
   "type": "module",
   "main": "dist/index.js",
