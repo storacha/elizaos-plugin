@@ -18,7 +18,7 @@ jobs:
           package-name: '@storacha/elizaos-plugin'
       - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
-      - run: pnpm publish --provenance
+      - run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         if: ${{ steps.release.outputs.release_created }}
