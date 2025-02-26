@@ -1,8 +1,10 @@
+name: Release
+
 on:
   push:
     branches:
       - main
-name: Release
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
@@ -10,15 +12,22 @@ jobs:
       id-token: write
       contents: write
       pull-requests: write
+      packages: write
+
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
           release-type: node
           package-name: '@storacha/elizaos-plugin'
+
       - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
-      - run: npm publish --access=public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+      - run: npm install
         if: ${{ steps.release.outputs.release_created }}
+
+      - run: npm publish --access=public --provenance
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
