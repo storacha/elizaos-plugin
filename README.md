@@ -1,4 +1,4 @@
-# @elizaos/plugin-storacha
+# @storacha/elizaos-plugin
 
 A plugin providing distributed storage functionality for ElizaOS agents.
 
@@ -9,7 +9,7 @@ The Storacha plugin enables agents to interact with a distributed storage networ
 ## Installation
 
 ```bash
-pnpm install @elizaos/plugin-storacha
+pnpm install @storacha/elizaos-plugin
 ```
 
 ## Configuration
