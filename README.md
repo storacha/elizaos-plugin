@@ -17,7 +17,7 @@ pnpm install @storacha/elizaos-plugin
 1. Add the plugin to the Agent configuration, e.g.
     ```typescript
     // eliza/agent/src/defaultCharacter.ts
-    import { storagePlugin } from "@elizaos/plugin-storacha";
+    import { storagePlugin } from "@storacha/elizaos-plugin";
 
     export const defaultCharacter: Character = {
         name: "Eliza",
