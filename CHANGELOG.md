@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.9](https://github.com/storacha/elizaos-plugin/compare/v1.0.8...v1.0.9) (2025-03-10)
+
+
+### Bug Fixes
+
+* module name ([#10](https://github.com/storacha/elizaos-plugin/issues/10)) ([16184da](https://github.com/storacha/elizaos-plugin/commit/16184daca5b95d3216dbcf36f23f0dd8e0e9563d))
+
 ## [1.0.8](https://github.com/storacha/elizaos-plugin/compare/v1.0.7...v1.0.8) (2025-02-26)
 
 
