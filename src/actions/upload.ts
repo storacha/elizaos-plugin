@@ -8,9 +8,10 @@ import {
     type State,
 } from "@elizaos/core";
 import { validateStorageClientConfig } from "../environments";
-import { createStorageClient } from "../services";
 import fs from "fs";
 import { defaultGatewayUrl } from "../utils";
+import { StorageClient } from "../services";
+import { createStorageClient } from "../clients/storage";
 
 export const uploadActionTemplate = `Respond with a text message containing the link of the directory containing the uploaded files.
 Extract the files from the most recent message. If no files are provided, respond with an error.
@@ -74,7 +75,6 @@ export const uploadAction: Action = {
                 action: null
             });
         }
-
         try {
             elizaLogger.info("Uploading file(s) to Storacha...");
             const config = await validateStorageClientConfig(runtime);
