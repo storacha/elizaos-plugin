@@ -1,11 +1,9 @@
+import { Client, IAgentRuntime, ClientInstance } from "@elizaos/core";
+import * as Storage from '@web3-storage/w3up-client';
 import { StoreMemory } from '@web3-storage/w3up-client/stores/memory';
 import { Signer } from '@ucanto/principal/ed25519';
-import { StorageClientConfig } from './environments';
-import * as Storage from '@web3-storage/w3up-client';
-import { parseDelegation } from './utils';
-import { Client, IAgentRuntime, ClientInstance } from "@elizaos/core";
-import { validateStorageClientConfig } from "./environments";
-import { defaultGatewayUrl } from "./utils";
+import { StorageClientConfig, validateStorageClientConfig } from "../environments";
+import { defaultGatewayUrl, parseDelegation } from '../utils';
 
 export class StorageClient implements Client {
     name = "storage";

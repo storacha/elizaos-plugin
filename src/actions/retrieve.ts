@@ -1,12 +1,11 @@
 import {
     type Action,
     type ActionExample,
-    elizaLogger,
     type HandlerCallback,
     type IAgentRuntime,
-    Media,
     type Memory,
     type State,
+    elizaLogger,
 } from "@elizaos/core";
 import { validateStorageClientConfig } from "../environments";
 import { defaultGatewayUrl, getCIDsFromMessage } from "../utils";
@@ -51,7 +50,7 @@ export const retrieveAction: Action = {
         elizaLogger.log("Starting STORAGE_RETRIEVE handler...");
         const cids = getCIDsFromMessage(message);
         if (cids.length === 0) {
-            callback?.({ text: "You didn't provide any CIDs to retrieve." });
+            await callback?.({ text: "You didn't provide any CIDs to retrieve the content." });
             return false;
         }
 
@@ -67,14 +66,14 @@ export const retrieveAction: Action = {
                     title: `File ${idx + 1}`,
                 };
             });
-            callback?.({
+            await callback?.({
                 text: `The file(s) you requested are ready to be downloaded. \n\n${files.map((file) => `- ${file.url}`).join("\n")}`,
             });
             elizaLogger.log("File(s) retrieved successfully!");
             return true;
         } catch (error) {
             elizaLogger.error("Error during retrieve file(s) from storage:", error);
-            callback?.({ text: `Error during retrieve file(s) from storage: ${error.message}` });
+            await callback?.({ text: `Error during retrieve file(s) from storage: ${error.message}` });
             return false;
         }
     },
