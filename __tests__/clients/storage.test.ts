@@ -79,6 +79,15 @@ describe('StorageClient', () => {
       expect(instance.stop).toBeInstanceOf(Function);
     });
     
+    it('should throw an error when start is called a second time', async () => {
+      // First call to start should succeed
+      await storageClient.start(mockRuntime);
+      
+      // Second call to start should throw an error
+      await expect(storageClient.start(mockRuntime))
+        .rejects.toThrow('Storage client already initialized');
+    });
+    
     it('should handle API errors during client initialization', async () => {
       const mockError = new Error('API connection failed');
       const createSpy = vi.spyOn(Storage, 'create').mockRejectedValueOnce(mockError);

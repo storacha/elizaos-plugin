@@ -11,6 +11,9 @@ export class StorageClient implements Client {
     config: StorageClientConfig | null = null;
 
     async start(runtime: IAgentRuntime): Promise<ClientInstance> {
+        if (this.storageClient) {
+            throw new Error("Storage client already initialized");
+        }
         this.config = await validateStorageClientConfig(runtime);
         this.storageClient = await createStorageClient(this.config);
 
