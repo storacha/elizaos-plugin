@@ -5,9 +5,9 @@ import { Signer } from '@ucanto/principal/ed25519';
 import { StorageClientConfig, validateStorageClientConfig } from "../environments";
 import { defaultGatewayUrl, parseDelegation } from '../utils';
 
-export class StorageClientImpl {
+export class StorageClientInstanceImpl implements ClientInstance {
     private readonly runtime: IAgentRuntime;
-    private storageClient: Storage.Client | null = null;
+    private storage: Storage.Client | null = null;
     config: StorageClientConfig | null = null;
 
     constructor(runtime: IAgentRuntime) {
@@ -16,12 +16,12 @@ export class StorageClientImpl {
 
     async start(): Promise<void> {
         try {
-            if (this.storageClient) {
+            if (this.storage) {
                 elizaLogger.info("Storage client already initialized");
                 return;
             }
             this.config = await validateStorageClientConfig(this.runtime);
-            this.storageClient = await createStorageClient(this.config);
+            this.storage = await createStorageClient(this.config);
             elizaLogger.success(`✅ Storage client successfully started`);
         } catch (error) {
             elizaLogger.error(`❌ Storage client failed to start: ${error}`);
@@ -30,15 +30,15 @@ export class StorageClientImpl {
     }
 
     async stop(runtime?: IAgentRuntime): Promise<void> {
-        this.storageClient = null;
+        this.storage = null;
         this.config = null;
     }
 
-    getStorageClient() {
-        if (!this.storageClient) {
+    getStorage() {
+        if (!this.storage) {
             throw new Error("Storage client not initialized");
         }
-        return this.storageClient;
+        return this.storage;
     }
 
     getConfig() {
@@ -51,12 +51,16 @@ export class StorageClientImpl {
     getGatewayUrl(): string {
         return this.config?.GATEWAY_URL || defaultGatewayUrl;
     }
+
+    getContent(cid: string): Promise<Response> {
+        return fetch(`${this.getGatewayUrl()}/ipfs/${cid}`);
+    }
 }
 
 export const StorageClientInterface: Client = {
     name: 'storage',
     start: async (runtime: IAgentRuntime): Promise<ClientInstance> => {
-        const storageClient = new StorageClientImpl(runtime);
+        const storageClient = new StorageClientInstanceImpl(runtime);
         await storageClient.start();
         return storageClient;
     }
