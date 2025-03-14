@@ -86,13 +86,13 @@ describe('StorageClientImpl', () => {
     expect(elizaLogger.success).toHaveBeenCalledWith('✅ Storage client successfully started');
   });
   
-  it('should throw an error when start is called a second time', async () => {
+  it('should return silently when start is called a second time', async () => {
     // First call to start should succeed
     await storageClientImpl.start();
     
-    // Second call to start should throw an error
-    await expect(storageClientImpl.start())
-      .rejects.toThrow('Storage client already initialized');
+    // Second call to start should return silently
+    await expect(storageClientImpl.start()).resolves.toBeUndefined();
+    expect(elizaLogger.info).toHaveBeenCalledWith('Storage client already initialized');
   });
   
   it('should handle API errors during client initialization', async () => {

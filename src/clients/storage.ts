@@ -17,7 +17,8 @@ export class StorageClientImpl {
     async start(): Promise<void> {
         try {
             if (this.storageClient) {
-                throw new Error("Storage client already initialized");
+                elizaLogger.info("Storage client already initialized");
+                return;
             }
             this.config = await validateStorageClientConfig(this.runtime);
             this.storageClient = await createStorageClient(this.config);
