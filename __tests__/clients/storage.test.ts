@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { StorageClient, createStorageClient } from '../../src/clients/storage';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { createStorageClient, StorageClientImpl, StorageClientInterface } from '../../src/clients/storage';
 import * as Storage from '@web3-storage/w3up-client';
 import { StoreMemory } from '@web3-storage/w3up-client/stores/memory';
-import { Signer } from '@ucanto/principal/ed25519';
 import { defaultGatewayUrl } from '../../src/utils';
+import { elizaLogger } from '@elizaos/core';
 
 // Mock dependencies
 vi.mock('@web3-storage/w3up-client', () => {
@@ -40,6 +40,15 @@ vi.mock('@ucanto/principal/ed25519', () => ({
   }
 }));
 
+vi.mock('@elizaos/core', () => ({
+  elizaLogger: {
+    log: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    success: vi.fn()
+  }
+}));
+
 vi.mock('../../src/utils', () => ({
   defaultGatewayUrl: 'https://w3s.link',
   parseDelegation: vi.fn().mockResolvedValue({ proofs: [] })
@@ -58,102 +67,103 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('StorageClient', () => {
-  let storageClient: StorageClient;
+describe('StorageClientImpl', () => {
+  let storageClientImpl: StorageClientImpl;
   let mockRuntime: any;
 
   beforeEach(() => {
-    storageClient = new StorageClient();
     mockRuntime = {
       getParameter: vi.fn(),
     };
     console.log = vi.fn(); // Mock console.log to avoid cluttering test output
+    storageClientImpl = new StorageClientImpl(mockRuntime);
   });
 
-  describe('start', () => {
-    it('should initialize the storage client', async () => {
-      const instance = await storageClient.start(mockRuntime);
-
-      expect(storageClient.getStorageClient()).not.toBeNull();
-      expect(instance.stop).toBeDefined();
-      expect(instance.stop).toBeInstanceOf(Function);
-    });
+  it('should initialize correctly', async () => {
+    await storageClientImpl.start();
     
-    it('should throw an error when start is called a second time', async () => {
-      // First call to start should succeed
-      await storageClient.start(mockRuntime);
-      
-      // Second call to start should throw an error
-      await expect(storageClient.start(mockRuntime))
-        .rejects.toThrow('Storage client already initialized');
-    });
-    
-    it('should handle API errors during client initialization', async () => {
-      const mockError = new Error('API connection failed');
-      const createSpy = vi.spyOn(Storage, 'create').mockRejectedValueOnce(mockError);
-      
-      await expect(storageClient.start(mockRuntime)).rejects.toThrow('API connection failed');
-      
-      // Clean up
-      createSpy.mockRestore();
-    });
-  });
-
-  describe('getStorageClient', () => {
-    it('should throw error if client is not initialized', () => {
-      expect(() => storageClient.getStorageClient()).toThrow('Storage client not initialized');
-    });
-
-    it('should return the storage client when initialized', async () => {
-      await storageClient.start(mockRuntime);
-
-      expect(storageClient.getStorageClient()).not.toBeNull();
-    });
-  });
-
-  describe('getConfig', () => {
-    it('should throw error if client is not initialized', () => {
-      expect(() => storageClient.getConfig()).toThrow('Storage client not initialized');
-    });
-
-    it('should return the config when initialized', async () => {
-      await storageClient.start(mockRuntime);
-
-      expect(storageClient.getConfig()).not.toBeNull();
-      expect(storageClient.getConfig()).toHaveProperty('GATEWAY_URL');
-      expect(storageClient.getConfig()).toHaveProperty('STORACHA_AGENT_PRIVATE_KEY');
-      expect(storageClient.getConfig()).toHaveProperty('STORACHA_AGENT_DELEGATION');
-    });
-  });
-
-  describe('getGatewayUrl', () => {
-    it('should return default gateway URL if client not initialized with config', () => {
-      storageClient.config = null;
-
-      const result = storageClient.getGatewayUrl();
-
-      expect(result).toBe(defaultGatewayUrl);
-    });
-
-    it('should return configured gateway URL when available', async () => {
-      await storageClient.start(mockRuntime);
-
-      const result = storageClient.getGatewayUrl();
-
-      expect(result).toBe('https://mock-gateway.link');
-    });
+    expect(storageClientImpl.getStorageClient()).not.toBeNull();
+    expect(elizaLogger.success).toHaveBeenCalledWith('✅ Storage client successfully started');
   });
   
-  describe('client lifecycle', () => {
-    it('should properly clean up resources when stopped', async () => {
-      const instance = await storageClient.start(mockRuntime);
-      expect(storageClient.getStorageClient()).not.toBeNull();
-      
-      await instance.stop(mockRuntime);
-      
-      expect(() => storageClient.getStorageClient()).toThrow('Storage client not initialized');
-      expect(() => storageClient.getConfig()).toThrow('Storage client not initialized');
-    });
+  it('should throw an error when start is called a second time', async () => {
+    // First call to start should succeed
+    await storageClientImpl.start();
+    
+    // Second call to start should throw an error
+    await expect(storageClientImpl.start())
+      .rejects.toThrow('Storage client already initialized');
+  });
+  
+  it('should handle API errors during client initialization', async () => {
+    const mockError = new Error('API connection failed');
+    const createSpy = vi.spyOn(Storage, 'create').mockRejectedValueOnce(mockError);
+    
+    await expect(storageClientImpl.start()).rejects.toThrow('API connection failed');
+    
+    // Clean up
+    createSpy.mockRestore();
+  });
+  
+  it('should throw error if client is not initialized when getting storage client', () => {
+    expect(() => storageClientImpl.getStorageClient()).toThrow('Storage client not initialized');
+  });
+  
+  it('should return the storage client when initialized', async () => {
+    await storageClientImpl.start();
+    expect(storageClientImpl.getStorageClient()).not.toBeNull();
+  });
+  
+  it('should throw error if client is not initialized when getting config', () => {
+    expect(() => storageClientImpl.getConfig()).toThrow('Storage client not initialized');
+  });
+  
+  it('should return the config when initialized', async () => {
+    await storageClientImpl.start();
+    
+    expect(storageClientImpl.getConfig()).not.toBeNull();
+    expect(storageClientImpl.getConfig()).toHaveProperty('GATEWAY_URL');
+    expect(storageClientImpl.getConfig()).toHaveProperty('STORACHA_AGENT_PRIVATE_KEY');
+    expect(storageClientImpl.getConfig()).toHaveProperty('STORACHA_AGENT_DELEGATION');
+  });
+  
+  it('should return default gateway URL if client not initialized with config', () => {
+    expect(storageClientImpl.getGatewayUrl()).toBe(defaultGatewayUrl);
+  });
+  
+  it('should return configured gateway URL when available', async () => {
+    await storageClientImpl.start();
+    expect(storageClientImpl.getGatewayUrl()).toBe('https://mock-gateway.link');
+  });
+  
+  it('should properly clean up resources when stopped', async () => {
+    await storageClientImpl.start();
+    expect(storageClientImpl.getStorageClient()).not.toBeNull();
+    
+    await storageClientImpl.stop();
+    
+    expect(() => storageClientImpl.getStorageClient()).toThrow('Storage client not initialized');
+    expect(() => storageClientImpl.getConfig()).toThrow('Storage client not initialized');
+  });
+});
+
+describe('StorageClientInterface', () => {
+  let mockRuntime: any;
+
+  beforeEach(() => {
+    mockRuntime = {
+      getParameter: vi.fn(),
+    };
+    console.log = vi.fn();
+  });
+
+  it('should create and return a StorageClientImpl instance when start is called', async () => {
+    const clientInstance = await StorageClientInterface.start(mockRuntime);
+    
+    expect(clientInstance).toBeDefined();
+    expect(clientInstance.stop).toBeDefined();
+    expect(clientInstance.stop).toBeInstanceOf(Function);
+    expect(elizaLogger.success).toHaveBeenCalledWith('✅ Storage client successfully started');
   });
 });
 

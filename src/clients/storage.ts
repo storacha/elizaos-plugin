@@ -1,28 +1,36 @@
-import { Client, IAgentRuntime, ClientInstance } from "@elizaos/core";
 import * as Storage from '@web3-storage/w3up-client';
+import { Client, IAgentRuntime, ClientInstance, elizaLogger } from "@elizaos/core";
 import { StoreMemory } from '@web3-storage/w3up-client/stores/memory';
 import { Signer } from '@ucanto/principal/ed25519';
 import { StorageClientConfig, validateStorageClientConfig } from "../environments";
 import { defaultGatewayUrl, parseDelegation } from '../utils';
 
-export class StorageClient implements Client {
-    name = "storage";
+export class StorageClientImpl {
+    private readonly runtime: IAgentRuntime;
     private storageClient: Storage.Client | null = null;
     config: StorageClientConfig | null = null;
 
-    async start(runtime: IAgentRuntime): Promise<ClientInstance> {
-        if (this.storageClient) {
-            throw new Error("Storage client already initialized");
-        }
-        this.config = await validateStorageClientConfig(runtime);
-        this.storageClient = await createStorageClient(this.config);
+    constructor(runtime: IAgentRuntime) {
+        this.runtime = runtime;
+    }
 
-        return {
-            stop: async () => {
-                this.storageClient = null;
-                this.config = null;
+    async start(): Promise<void> {
+        try {
+            if (this.storageClient) {
+                throw new Error("Storage client already initialized");
             }
-        };
+            this.config = await validateStorageClientConfig(this.runtime);
+            this.storageClient = await createStorageClient(this.config);
+            elizaLogger.success(`✅ Storage client successfully started`);
+        } catch (error) {
+            elizaLogger.error(`❌ Storage client failed to start: ${error}`);
+            throw error;
+        }
+    }
+
+    async stop(runtime?: IAgentRuntime): Promise<void> {
+        this.storageClient = null;
+        this.config = null;
     }
 
     getStorageClient() {
@@ -44,6 +52,15 @@ export class StorageClient implements Client {
     }
 }
 
+export const StorageClientInterface: Client = {
+    name: 'storage',
+    start: async (runtime: IAgentRuntime): Promise<ClientInstance> => {
+        const storageClient = new StorageClientImpl(runtime);
+        await storageClient.start();
+        return storageClient;
+    }
+};
+
 export const createStorageClient = async (config: StorageClientConfig): Promise<Storage.Client> => {
     if (!config.STORACHA_AGENT_PRIVATE_KEY) {
         throw new Error("Agent private key is missing from the storage client configuration");
@@ -63,5 +80,3 @@ export const createStorageClient = async (config: StorageClientConfig): Promise<
 
     return client;
 }
-
-export const storageClient = new StorageClient();

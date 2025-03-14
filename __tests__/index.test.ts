@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { storagePlugin } from '../src/index';
 import { uploadAction, retrieveAction } from '../src/actions';
-import { storageClient } from '../src/clients/storage';
+import { StorageClientInterface } from '../src/clients/storage';
 import { storageClientEnvSchema } from '../src/environments';
 
 describe('storagePlugin', () => {
@@ -22,7 +22,7 @@ describe('storagePlugin', () => {
     expect(storagePlugin.clients).toBeDefined();
     expect(Array.isArray(storagePlugin.clients)).toBe(true);
     expect(storagePlugin.clients?.length).toBe(1);
-    expect(storagePlugin.clients?.[0]).toBe(storageClient);
+    expect(storagePlugin.clients?.[0]).toBe(StorageClientInterface);
     
     // Check empty arrays
     expect(storagePlugin.services).toHaveLength(0);
