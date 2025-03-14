@@ -1,14 +1,14 @@
 import type { Plugin } from "@elizaos/core";
-import { uploadAction } from "./actions/upload.ts";
+import { uploadAction, retrieveAction } from "./actions";
 import { storageClientEnvSchema } from "./environments.ts";
-import { retrieveAction } from "./actions/retrieve.ts";
-export * as actions from "./actions";
+import { StorageClientInterface } from "./clients/storage.ts";
 
 export const storagePlugin: Plugin = {
     name: "storage",
     description: "Plugin to manage files in a decentralized storage network",
     config: storageClientEnvSchema,
     actions: [uploadAction, retrieveAction],
+    clients: [StorageClientInterface],
     services: [],
     evaluators: [],
     providers: [],

@@ -1,4 +1,4 @@
-import { composeContext, elizaLogger, generateMessageResponse, ModelClass } from "@elizaos/core";
+import { elizaLogger } from "@elizaos/core";
 import {
     type Action,
     type ActionExample,
@@ -7,23 +7,10 @@ import {
     type Memory,
     type State,
 } from "@elizaos/core";
-import { validateStorageClientConfig } from "../environments";
-import { createStorageClient } from "../services";
 import fs from "fs";
+import { validateStorageClientConfig } from "../environments";
 import { defaultGatewayUrl } from "../utils";
-
-export const uploadActionTemplate = `Respond with a text message containing the link of the directory containing the uploaded files.
-Extract the files from the most recent message. If no files are provided, respond with an error.
-
-The response must include:
-- link: The link of the directory containing the uploaded files
-
-Example response:
-- The files have been uploaded to Storacha. You can access them at the following link: https://w3s.link/ipfs/QmHash1
-
-{{recentMessages}}
-Extract the files from the most recent message.
-Respond with a text message containing the link of the directory containing the uploaded files.`;
+import { createStorageClient } from "../clients/storage";
 
 export const uploadAction: Action = {
     name: "STORAGE_UPLOAD",
@@ -40,24 +27,6 @@ export const uploadAction: Action = {
         options?: { [key: string]: unknown },
         callback?: HandlerCallback
     ) => {
-        // Initialize/update state
-        // let currentState: State = state;
-        // if (!currentState) {
-        //     currentState = (await runtime.composeState(message)) as State;
-        // }
-        // currentState = await runtime.updateRecentMessageState(currentState);
-
-        // const uploadContext = composeContext({
-        //     state: currentState,
-        //     template: uploadActionTemplate,
-        // });
-
-        // await generateMessageResponse({
-        //     runtime,
-        //     context: uploadContext,
-        //     modelClass: ModelClass.SMALL,
-        // });
-
         const attachments = message.content.attachments;
         if (attachments && attachments.length === 0) {
             elizaLogger.error("No file to upload.");
@@ -74,7 +43,6 @@ export const uploadAction: Action = {
                 action: null
             });
         }
-
         try {
             elizaLogger.info("Uploading file(s) to Storacha...");
             const config = await validateStorageClientConfig(runtime);
@@ -105,7 +73,7 @@ export const uploadAction: Action = {
             const gatewayUrl = config.GATEWAY_URL || defaultGatewayUrl;
             const link = `${gatewayUrl}/ipfs/${directoryLink.link().toString()}`;
             elizaLogger.info(`Uploaded file(s) to Storacha. Link: ${link}`);
-            callback?.({
+            await callback?.({
                 text: `Here you go! You can access the file(s) at the following link: ${link}`,
                 action: null,
             });
@@ -114,7 +82,7 @@ export const uploadAction: Action = {
             return true;
         } catch (error) {
             elizaLogger.error("Error uploading file(s) to Storacha", error);
-            callback?.({
+            await callback?.({
                 text: "I'm sorry, I couldn't upload the file(s) to Storacha. Please try again later.",
                 content: { error: error.message },
             });
