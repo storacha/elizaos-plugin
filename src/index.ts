@@ -19,10 +19,19 @@ export const storagePlugin: Plugin = {
     providers: [],
 };
 
+
+/**
+ * A helper function for Agent to get the storage client.
+ * It returns the first storage client from the runtime that is identified as plugin.name === storage.
+ * 
+ * @param runtime - The runtime to get the storage client from.
+ * @returns The storage client.
+ * @throws An error if no storage client is found.
+ */
 export const getStorageClient = async (runtime: IAgentRuntime): Promise<StorageClientInstanceImpl> => {
     const storagePlugin = runtime.plugins.find((plugin) => plugin.name === PluginName);
     if (storagePlugin && storagePlugin.clients && storagePlugin.clients.length > 0) {
-        const storageStarter = storagePlugin.clients[0];
+        const [storageStarter] = storagePlugin.clients;
         if (storageStarter) {
             const storageClient = await storageStarter.start(runtime);
             return storageClient as StorageClientInstanceImpl;
