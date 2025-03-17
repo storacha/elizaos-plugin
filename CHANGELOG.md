@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/storacha/elizaos-plugin/compare/v1.0.9...v1.1.0) (2025-03-17)
+
+
+### Features
+
+* storage client ([#12](https://github.com/storacha/elizaos-plugin/issues/12)) ([4984ec2](https://github.com/storacha/elizaos-plugin/commit/4984ec252931cbcbeba62eb064d03e7cc63ac5a2))
+
+
+### Bug Fixes
+
+* added helper func to get storage client + tests ([#14](https://github.com/storacha/elizaos-plugin/issues/14)) ([a8a439c](https://github.com/storacha/elizaos-plugin/commit/a8a439cea7cbaa9952576e562ac2f5f49a2b9487))
+
 ## [1.0.9](https://github.com/storacha/elizaos-plugin/compare/v1.0.8...v1.0.9) (2025-03-10)
 
 
