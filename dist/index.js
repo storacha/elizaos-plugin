@@ -459,7 +459,7 @@ var storagePlugin = {
 var getStorageClient = async (runtime) => {
   const storagePlugin2 = runtime.plugins.find((plugin) => plugin.name === PluginName);
   if (storagePlugin2 && storagePlugin2.clients && storagePlugin2.clients.length > 0) {
-    const storageStarter = storagePlugin2.clients[0];
+    const [storageStarter] = storagePlugin2.clients;
     if (storageStarter) {
       const storageClient = await storageStarter.start(runtime);
       return storageClient;

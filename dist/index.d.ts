@@ -36,6 +36,14 @@ declare class StorageClientInstanceImpl implements ClientInstance {
 declare const StorageClientInterface: Client;
 
 declare const storagePlugin: Plugin;
+/**
+ * A helper function for Agent to get the storage client.
+ * It returns the first storage client from the runtime that is identified as plugin.name === storage.
+ *
+ * @param runtime - The runtime to get the storage client from.
+ * @returns The storage client.
+ * @throws An error if no storage client is found.
+ */
 declare const getStorageClient: (runtime: IAgentRuntime) => Promise<StorageClientInstanceImpl>;
 
 export { StorageClientInstanceImpl as StorageClientImpl, StorageClientInterface, storagePlugin as default, getStorageClient, storagePlugin };
