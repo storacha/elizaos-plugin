@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createStorageClient, StorageClientImpl, StorageClientInterface } from '../../src/clients/storage';
+import { createStorageClient, StorageClientInstanceImpl, StorageClientInterface } from '../../src/clients/storage';
 import * as Storage from '@web3-storage/w3up-client';
 import { StoreMemory } from '@web3-storage/w3up-client/stores/memory';
 import { defaultGatewayUrl } from '../../src/utils';
@@ -62,13 +62,16 @@ vi.mock('../../src/environments', () => ({
   })
 }));
 
+// Mock fetch for getContent tests
+global.fetch = vi.fn();
+
 // Clear mocks once before all tests
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe('StorageClientImpl', () => {
-  let storageClientImpl: StorageClientImpl;
+  let storageClientImpl: StorageClientInstanceImpl;
   let mockRuntime: any;
 
   beforeEach(() => {
@@ -76,13 +79,14 @@ describe('StorageClientImpl', () => {
       getParameter: vi.fn(),
     };
     console.log = vi.fn(); // Mock console.log to avoid cluttering test output
-    storageClientImpl = new StorageClientImpl(mockRuntime);
+    storageClientImpl = new StorageClientInstanceImpl(mockRuntime);
+    (global.fetch as any).mockReset();
   });
 
   it('should initialize correctly', async () => {
     await storageClientImpl.start();
     
-    expect(storageClientImpl.getStorageClient()).not.toBeNull();
+    expect(storageClientImpl.getStorage()).not.toBeNull();
     expect(elizaLogger.success).toHaveBeenCalledWith('✅ Storage client successfully started');
   });
   
@@ -106,12 +110,12 @@ describe('StorageClientImpl', () => {
   });
   
   it('should throw error if client is not initialized when getting storage client', () => {
-    expect(() => storageClientImpl.getStorageClient()).toThrow('Storage client not initialized');
+    expect(() => storageClientImpl.getStorage()).toThrow('Storage client not initialized');
   });
   
   it('should return the storage client when initialized', async () => {
     await storageClientImpl.start();
-    expect(storageClientImpl.getStorageClient()).not.toBeNull();
+    expect(storageClientImpl.getStorage()).not.toBeNull();
   });
   
   it('should throw error if client is not initialized when getting config', () => {
@@ -138,12 +142,47 @@ describe('StorageClientImpl', () => {
   
   it('should properly clean up resources when stopped', async () => {
     await storageClientImpl.start();
-    expect(storageClientImpl.getStorageClient()).not.toBeNull();
+    expect(storageClientImpl.getStorage()).not.toBeNull();
     
     await storageClientImpl.stop();
     
-    expect(() => storageClientImpl.getStorageClient()).toThrow('Storage client not initialized');
+    expect(() => storageClientImpl.getStorage()).toThrow('Storage client not initialized');
     expect(() => storageClientImpl.getConfig()).toThrow('Storage client not initialized');
+  });
+
+  describe('getContent', () => {
+    it('should fetch content from the configured gateway URL', async () => {
+      await storageClientImpl.start();
+      const testCid = 'bafytest123';
+      const mockResponse = new Response('mock content');
+      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+
+      const result = await storageClientImpl.getContent(testCid);
+
+      expect(global.fetch).toHaveBeenCalledWith('https://mock-gateway.link/ipfs/bafytest123');
+      expect(result).toBe(mockResponse);
+    });
+
+    it('should fetch content from the default gateway URL when not configured', async () => {
+      storageClientImpl.config = null; // No config set
+      const testCid = 'bafytest123';
+      const mockResponse = new Response('mock content');
+      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+
+      const result = await storageClientImpl.getContent(testCid);
+
+      expect(global.fetch).toHaveBeenCalledWith(`${defaultGatewayUrl}/ipfs/bafytest123`);
+      expect(result).toBe(mockResponse);
+    });
+
+    it('should propagate fetch errors', async () => {
+      await storageClientImpl.start();
+      const testCid = 'bafytest123';
+      const mockError = new Error('Network error');
+      (global.fetch as any).mockRejectedValueOnce(mockError);
+
+      await expect(storageClientImpl.getContent(testCid)).rejects.toThrow('Network error');
+    });
   });
 });
 

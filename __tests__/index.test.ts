@@ -1,8 +1,26 @@
-import { describe, it, expect } from 'vitest';
-import { storagePlugin } from '../src/index';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { storagePlugin, getStorageClient } from '../src/index';
 import { uploadAction, retrieveAction } from '../src/actions';
 import { StorageClientInterface } from '../src/clients/storage';
 import { storageClientEnvSchema } from '../src/environments';
+
+// Mock dependencies
+vi.mock('../src/clients/storage', () => {
+  const mockStorageClient = {
+    getStorage: vi.fn().mockReturnValue('mock-storage-client'),
+    stop: vi.fn()
+  };
+  
+  return {
+    StorageClientInterface: {
+      name: 'storage',
+      start: vi.fn().mockResolvedValue(mockStorageClient)
+    },
+    StorageClientInstanceImpl: class MockStorageClientImpl {
+      getStorage = vi.fn().mockReturnValue('mock-storage-client');
+    }
+  };
+});
 
 describe('storagePlugin', () => {
   it('should export the correct plugin structure', () => {
@@ -34,5 +52,54 @@ describe('storagePlugin', () => {
     const defaultExport = storagePlugin;
     expect(defaultExport).toBeDefined();
     expect(defaultExport.name).toBe('storage');
+  });
+});
+
+describe('getStorageClient', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should return the storage client when plugin is found in runtime', async () => {
+    const mockRuntime = {
+      plugins: [
+        {
+          name: 'storage',
+          clients: [StorageClientInterface]
+        }
+      ]
+    };
+
+    const result = await getStorageClient(mockRuntime as any);
+
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty('getStorage');
+    expect(StorageClientInterface.start).toHaveBeenCalledWith(mockRuntime);
+  });
+
+  it('should throw an error when plugin is not found in runtime', async () => {
+    const mockRuntime = {
+      plugins: [
+        {
+          name: 'different-plugin',
+          clients: []
+        }
+      ]
+    };
+
+    await expect(getStorageClient(mockRuntime as any)).rejects.toThrow('Storage client not found in runtime');
+  });
+
+  it('should throw an error when plugin has no clients', async () => {
+    const mockRuntime = {
+      plugins: [
+        {
+          name: 'storage',
+          clients: []
+        }
+      ]
+    };
+
+    await expect(getStorageClient(mockRuntime as any)).rejects.toThrow('Storage client not found in runtime');
   });
 }); 
