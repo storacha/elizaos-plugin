@@ -38,7 +38,7 @@ export async function validateStorageClientConfig(
         const c = storageClientEnvSchema.parse(config);
         return c;
     } catch (error) {
-        elizaLogger.error("Storage client config validation failed", error);
+        elizaLogger.error(error, "Storage client config validation failed");
         if (error instanceof z.ZodError) {
             const errorMessages = error.errors
                 .map((err) => `${err.path.join(".")}: ${err.message}`)

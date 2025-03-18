@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { uploadAction } from '../../src/actions/upload';
 import { validateStorageClientConfig } from '../../src/environments';
 import { createStorageClient } from '../../src/clients/storage';
+import { elizaLogger } from '@elizaos/core';
 import fs from 'fs';
 
 // Mock dependencies
@@ -166,6 +167,69 @@ describe('uploadAction', () => {
       expect(mockCallback).toHaveBeenNthCalledWith(2, {
         text: "I'm sorry, I couldn't upload the file(s) to Storacha. Please try again later.",
         content: { error: 'Upload failed' }
+      });
+    });
+    
+    describe('error logging', () => {
+      it('should log full error object with stacktrace, not just the message', async () => {
+        const mockAttachments = [
+          { url: 'file:///path/to/file.txt', title: 'file.txt', contentType: 'text/plain' }
+        ];
+        const mockMessage = { content: { attachments: mockAttachments } };
+        
+        // Create an error with a stack trace
+        const errorWithStack = new Error('Test error with stack');
+        
+        // Reject with the full error object that has a stack
+        (createStorageClient as any).mockRejectedValueOnce(errorWithStack);
+        
+        // Call the handler
+        await uploadAction.handler(
+          mockRuntime,
+          mockMessage as any,
+          {} as any,
+          {},
+          mockCallback
+        );
+        
+        // Verify error logging
+        expect(elizaLogger.error).toHaveBeenCalled();
+        
+        // Check that the first argument to elizaLogger.error is the full error object
+        const errorArg = (elizaLogger.error as any).mock.calls[0][0];
+        
+        // Verify we're passing the full error object, not just the message
+        expect(errorArg).toBe(errorWithStack);
+        expect(errorArg).toBeInstanceOf(Error);
+        
+        // In a real test environment, the error would have a stack property
+        expect(errorArg).toEqual(expect.objectContaining({
+          message: 'Test error with stack'
+        }));
+      });
+      
+      it('should include custom context message with error logs', async () => {
+        const mockAttachments = [
+          { url: 'file:///path/to/file.txt', title: 'file.txt', contentType: 'text/plain' }
+        ];
+        const mockMessage = { content: { attachments: mockAttachments } };
+        
+        const error = new Error('Test error');
+        (createStorageClient as any).mockRejectedValueOnce(error);
+        
+        await uploadAction.handler(
+          mockRuntime,
+          mockMessage as any,
+          {} as any,
+          {},
+          mockCallback
+        );
+        
+        // Check that a context message is provided as the second parameter
+        expect(elizaLogger.error).toHaveBeenCalledWith(
+          error,
+          "Error uploading file(s) to Storacha"
+        );
       });
     });
   });

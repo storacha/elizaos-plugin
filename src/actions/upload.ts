@@ -81,7 +81,7 @@ export const uploadAction: Action = {
             elizaLogger.success("File(s) uploaded to Storacha");
             return true;
         } catch (error) {
-            elizaLogger.error("Error uploading file(s) to Storacha", error);
+            elizaLogger.error(error, "Error uploading file(s) to Storacha");
             await callback?.({
                 text: "I'm sorry, I couldn't upload the file(s) to Storacha. Please try again later.",
                 content: { error: error.message },
