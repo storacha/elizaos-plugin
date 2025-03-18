@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/storacha/elizaos-plugin/compare/v1.1.0...v1.2.0) (2025-03-18)
+
+
+### Features
+
+* preparing repo for ElizaOS Plugin Registry ([#15](https://github.com/storacha/elizaos-plugin/issues/15)) ([287ff27](https://github.com/storacha/elizaos-plugin/commit/287ff273d4c4444603ae7a5c9160f1562ed2f2b6))
+
+
+### Bug Fixes
+
+* properly pass the error obj to logger ([#17](https://github.com/storacha/elizaos-plugin/issues/17)) ([98ad239](https://github.com/storacha/elizaos-plugin/commit/98ad239c6df066d4e62c04b9c87676b634e4a07c))
+
 ## [1.1.0](https://github.com/storacha/elizaos-plugin/compare/v1.0.9...v1.1.0) (2025-03-17)
 
 
