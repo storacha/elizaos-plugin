@@ -64,5 +64,8 @@
         "description": "The gateway URL to use for fetching data from the network. Defaults to https://w3s.link"
       }
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
