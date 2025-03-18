@@ -1,4 +1,4 @@
-# @elizaos/plugin-storacha
+# @storacha/elizaos-plugin
 
 A plugin providing distributed storage functionality for ElizaOS agents.
 
@@ -9,7 +9,7 @@ The Storacha plugin enables agents to interact with a distributed storage networ
 ## Installation
 
 ```bash
-pnpm install @elizaos/plugin-storacha
+pnpm install @storacha/elizaos-plugin
 ```
 
 ## Configuration
@@ -17,7 +17,7 @@ pnpm install @elizaos/plugin-storacha
 1. Add the plugin to the Agent configuration, e.g.
     ```typescript
     // eliza/agent/src/defaultCharacter.ts
-    import { storagePlugin } from "@elizaos/plugin-storacha";
+    import { storagePlugin } from "@storacha/elizaos-plugin";
 
     export const defaultCharacter: Character = {
         name: "Eliza",
