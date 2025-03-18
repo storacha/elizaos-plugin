@@ -144,10 +144,56 @@ describe('StorageClientImpl', () => {
     await storageClientImpl.start();
     expect(storageClientImpl.getStorage()).not.toBeNull();
     
-    await storageClientImpl.stop();
+    await storageClientImpl.stop(mockRuntime);
     
     expect(() => storageClientImpl.getStorage()).toThrow('Storage client not initialized');
     expect(() => storageClientImpl.getConfig()).toThrow('Storage client not initialized');
+  });
+
+  describe('error logging', () => {
+    it('should log full error object with stacktrace during client initialization', async () => {
+      // Create an error with a stack trace
+      const errorWithStack = new Error('API connection failed with stack');
+      
+      // Mock the client creation to throw our error with stack
+      const createSpy = vi.spyOn(Storage, 'create').mockRejectedValueOnce(errorWithStack);
+      
+      // Expect the start method to throw
+      await expect(storageClientImpl.start()).rejects.toThrow('API connection failed with stack');
+      
+      // Verify error logging received the full error object
+      expect(elizaLogger.error).toHaveBeenCalled();
+      
+      // Get the first argument passed to elizaLogger.error
+      const errorArg = (elizaLogger.error as any).mock.calls[0][0];
+      
+      // Verify it's the full error with stack
+      expect(errorArg).toBe(errorWithStack);
+      expect(errorArg).toBeInstanceOf(Error);
+      expect(errorArg).toEqual(expect.objectContaining({
+        message: 'API connection failed with stack'
+      }));
+      
+      // Clean up
+      createSpy.mockRestore();
+    });
+    
+    it('should include custom context message with error logs', async () => {
+      const errorWithStack = new Error('Client initialization failed');
+      const createSpy = vi.spyOn(Storage, 'create').mockRejectedValueOnce(errorWithStack);
+      
+      // Try to start the client, which should fail
+      await expect(storageClientImpl.start()).rejects.toThrow('Client initialization failed');
+      
+      // Check that a context message is provided as the second parameter
+      expect(elizaLogger.error).toHaveBeenCalledWith(
+        errorWithStack,
+        "❌ Storage client failed to start"
+      );
+      
+      // Clean up
+      createSpy.mockRestore();
+    });
   });
 
   describe('getContent', () => {
@@ -182,6 +228,27 @@ describe('StorageClientImpl', () => {
       (global.fetch as any).mockRejectedValueOnce(mockError);
 
       await expect(storageClientImpl.getContent(testCid)).rejects.toThrow('Network error');
+    });
+    
+    it('should log full error object when fetch fails', async () => {
+      await storageClientImpl.start();
+      const testCid = 'bafytest123';
+      const fetchError = new Error('Network fetch error with stack');
+      (global.fetch as any).mockRejectedValueOnce(fetchError);
+      
+      // The getContent method doesn't have error logging, so this test is confirming
+      // that it properly propagates the error without losing the stack
+      await expect(storageClientImpl.getContent(testCid)).rejects.toThrow('Network fetch error with stack');
+      
+      // Verify the error object is intact with its properties
+      try {
+        await storageClientImpl.getContent(testCid);
+      } catch (error) {
+        expect(error).toBe(fetchError);
+        expect(error).toBeInstanceOf(Error);
+        expect(error).toHaveProperty('stack');
+        expect(error.message).toBe('Network fetch error with stack');
+      }
     });
   });
 });

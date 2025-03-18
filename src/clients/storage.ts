@@ -24,7 +24,7 @@ export class StorageClientInstanceImpl implements ClientInstance {
             this.storage = await createStorageClient(this.config);
             elizaLogger.success(`✅ Storage client successfully started`);
         } catch (error) {
-            elizaLogger.error(`❌ Storage client failed to start: ${error}`);
+            elizaLogger.error(error, "❌ Storage client failed to start");
             throw error;
         }
     }

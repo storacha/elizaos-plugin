@@ -72,7 +72,7 @@ export const retrieveAction: Action = {
             elizaLogger.log("File(s) retrieved successfully!");
             return true;
         } catch (error) {
-            elizaLogger.error("Error during retrieve file(s) from storage:", error);
+            elizaLogger.error(error, "Error during retrieve file(s) from storage");
             await callback?.({ text: `Error during retrieve file(s) from storage: ${error.message}` });
             return false;
         }
