@@ -1,5 +1,5 @@
 {
-  "name": "@elizaos-plugins/plugin-storacha",
+  "name": "@storacha/plugin-storage",
   "version": "1.1.0",
   "description": "Storacha Storage Plugin for ElizaOS",
   "type": "module",
