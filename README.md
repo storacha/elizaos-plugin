@@ -9,7 +9,7 @@ The Storacha plugin enables agents to interact with a distributed storage networ
 ## Installation
 
 ```bash
-pnpm install @storacha/elizaos-plugin
+npx elizaos plugins add @elizaos-plugins/plugin-storacha
 ```
 
 ## Configuration
@@ -17,12 +17,11 @@ pnpm install @storacha/elizaos-plugin
 1. Add the plugin to the Agent configuration, e.g.
     ```typescript
     // eliza/agent/src/defaultCharacter.ts
-    import { storagePlugin } from "@storacha/elizaos-plugin";
 
     export const defaultCharacter: Character = {
         name: "Eliza",
         username: "eliza",
-        plugins: [storagePlugin],
+        plugins: ["@elizaos-plugins/plugin-storacha"],
         ...
     };
     ```
@@ -103,12 +102,16 @@ pnpm run build
 
 ## Dependencies
 
-- @elizaos/core: workspace:*
+- `@elizaos/core: workspace:*`
 
 ## Future Enhancements
 - Conversation History & Agent Context Backup
 - Cross Agent Data Sharing
 - Encryption with LIT Protocol
+
+## Storacha Client
+
+You can access the Storacha Client directly from the agent code if the plugin is enabled in the `character` file, see the [Quickstart for AI guide](https://docs.storacha.network/ai/quickstart/#elizaos) for more info.
 
 ## License
 
