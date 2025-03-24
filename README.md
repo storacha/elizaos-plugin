@@ -111,21 +111,7 @@ pnpm run build
 
 ## Storacha Client
 
-You can access the Storacha Client directly from the agent code if the plugin is enabled in the `character` file e.g.:
-
-**Upload**
-```js
-const storageClient = await getStorageClient(runtime);
-if (storageClient) {
-    const cid = await storageClient.getStorage().uploadFile(...);
-}
-```
-
-**Retrieve**
-```js
-const resp = await storageClient.getContent(cid)
-const content = await resp.arrayBuffer()
-```
+You can access the Storacha Client directly from the agent code if the plugin is enabled in the `character` file, see the [Quickstart for AI guide](https://docs.storacha.network/ai/quickstart/#elizaos) for more info.
 
 ## License
 
