@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/storacha/elizaos-plugin/compare/v1.2.0...v1.2.1) (2025-03-24)
+
+
+### Bug Fixes
+
+* update readme to install plugin from official registry ([#18](https://github.com/storacha/elizaos-plugin/issues/18)) ([e57fbc0](https://github.com/storacha/elizaos-plugin/commit/e57fbc0a7ae19cbcb24608599732c568965c47e8))
+
 ## [1.2.0](https://github.com/storacha/elizaos-plugin/compare/v1.1.0...v1.2.0) (2025-03-18)
 
 
